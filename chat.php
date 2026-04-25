@@ -152,7 +152,7 @@ $chatList = $sql->rows();
 
 
 $CHATBOX_LIST_TEMPLATE =
-	e107::getTemplate('chatbox', 'chatbox', 'list');
+	e107::getTemplate('chatbox', 'chatbox_menu', 'list');
 
 $sc = e107::getScBatch('chatbox', true);
 
