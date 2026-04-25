@@ -20,7 +20,7 @@
 
 if (!defined('e107_INIT')) { exit; }
 
-class chatbox_menu_dashboard // include plugin-folder in the name.
+class chatbox_dashboard // include plugin-folder in the name.
 {
 	function chart()
 	{

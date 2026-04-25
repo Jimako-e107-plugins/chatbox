@@ -11,7 +11,7 @@
 if (!defined('e107_INIT')) { exit; }
 
 // v2.x Standard 
-class chatbox_menu_user // plugin-folder + '_user' 
+class chatbox_user // plugin-folder + '_user' 
 {
 
 	function profile($udata)

@@ -12,7 +12,7 @@
 if (!defined('e107_INIT')) { exit; }
 
 // v2.x Standard 
-class chatbox_menu_rss // plugin-folder + '_rss' 
+class chatbox_rss // plugin-folder + '_rss' 
 {
 	/**
 	 * Admin RSS Configuration 

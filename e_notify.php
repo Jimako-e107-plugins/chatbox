@@ -29,7 +29,7 @@ if (!function_exists('notify_cboxpost')) {
 
 
 // v2.x Standard 
-class chatbox_menu_notify extends notify // plugin-folder + '_notify' 
+class chatbox_notify extends notify // plugin-folder + '_notify' 
 {		
 	function config()
 	{

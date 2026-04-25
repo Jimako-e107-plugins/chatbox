@@ -15,7 +15,7 @@ if (!defined('e107_INIT')) { exit; }
 // v2 e_search addon. 
 // Removes the need for search_parser.php, search_advanced.php and in most cases search language files. 
 
-class chatbox_menu_search extends e_search // include plugin-folder in the name.
+class chatbox_search extends e_search // include plugin-folder in the name.
 {
 		
 	function config()
