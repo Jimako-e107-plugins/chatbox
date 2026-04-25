@@ -10,12 +10,12 @@
  *
 */
 require_once(__DIR__.'/../../class2.php');
-if ( ! e107::isInstalled('chatbox_menu')) {
+if ( ! e107::isInstalled('chatbox')) {
 	e107::redirect();
 	exit;
 }
 
-e107::lan('chatbox_menu', e_LANGUAGE);
+e107::lan('chatbox', e_LANGUAGE);
 
 require_once(HEADERF);
 $mes = e107::getMessage();
@@ -152,9 +152,9 @@ $chatList = $sql->rows();
 
 
 $CHATBOX_LIST_TEMPLATE =
-	e107::getTemplate('chatbox_menu', 'chatbox_menu', 'list');
+	e107::getTemplate('chatbox', 'chatbox', 'list');
 
-$sc = e107::getScBatch('chatbox_menu', true);
+$sc = e107::getScBatch('chatbox', true);
 
 
 $textstring = '';

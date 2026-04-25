@@ -12,15 +12,15 @@
 
 require_once(__DIR__.'/../../class2.php');
 
-if (!e107::isInstalled('chatbox_menu') || !getperms("P"))
+if (!e107::isInstalled('chatbox') || !getperms("P"))
 {
 	e107::redirect('admin');
 	exit;
 }
 
-// include_lXXXan( e_PLUGIN."chatbox_menu/languages/".e_LANGUAGE."/admin_chatbox_menu.php");
+// include_lXXXan( e_PLUGIN."chatbox/languages/".e_LANGUAGE."/admin_chatbox_menu.php");
 
-e107::lan('chatbox_menu','admin_chatbox_menu');
+e107::lan('chatbox','admin_chatbox_menu');
 
 
 require_once(e_ADMIN."auth.php");
@@ -150,7 +150,7 @@ function admin_chatbox_adminmenu()
 
 	$caption = "<span>".LAN_PLUGIN_CHATBOX_MENU_NAME."</span>";
 
-	$var['_extras_']['icon']  = e107::getParser()->toIcon(e_PLUGIN."chatbox_menu/images/chatbox_32.png");
+	$var['_extras_']['icon']  = e107::getParser()->toIcon(e_PLUGIN."chatbox/images/chatbox_32.png");
 
 	e107::getNav()->admin($caption, $mode, $var);
 }

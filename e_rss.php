@@ -53,7 +53,7 @@ class chatbox_menu_rss // plugin-folder + '_rss'
 				$tmp						= explode(".", $row['cb_nick']);
 				$rss[$i]['author']			= $tmp[1];
 				$rss[$i]['author_email']	= ''; 
-				$rss[$i]['link']			= "chatbox_menu/chat.php?".$row['cb_id'];
+				$rss[$i]['link']			= "chatbox/chat.php?".$row['cb_id'];
 				$rss[$i]['linkid']			= $row['cb_id'];
 				$rss[$i]['title']			= '';
 				$rss[$i]['description']		= $row['cb_message'];
@@ -85,7 +85,7 @@ class chatbox_menu_rss // plugin-folder + '_rss'
 $feed['name']		= 'Chatbox';
 $feed['url']		= 'chatbox';			//the identifier for the rss feed url
 $feed['topic_id']	= '';					//the topic_id, empty on default (to select a certain category)
-$feed['path']		= 'chatbox_menu';		//this is the plugin path location
+$feed['path']		= 'chatbox';		//this is the plugin path location
 $feed['text']		= 'this is the rss feed for the chatbox entries';
 $feed['class']		= '0';
 $feed['limit']		= '9';
@@ -101,7 +101,7 @@ if($items = $sql->select('chatbox', "*", "cb_blocked=0 ORDER BY cb_datestamp DES
 		$tmp						= explode(".", $rowrss['cb_nick']);
 		$rss[$i]['author']			= $tmp[1];
 		$rss[$i]['author_email']	= '';
-		$rss[$i]['link']			= $e107->base_path.$PLUGINS_DIRECTORY."chatbox_menu/chat.php?".$rowrss['cb_id'];
+		$rss[$i]['link']			= $e107->base_path.$PLUGINS_DIRECTORY."chatbox/chat.php?".$rowrss['cb_id'];
 		$rss[$i]['linkid']			= $rowrss['cb_id'];
 		$rss[$i]['title']			= '';
 		$rss[$i]['description']		= $rowrss['cb_message'];

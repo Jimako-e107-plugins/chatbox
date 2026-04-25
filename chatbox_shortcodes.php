@@ -15,7 +15,7 @@ if(!defined('e107_INIT'))
 }
 
 
-class chatbox_menu_shortcodes extends e_shortcode
+class chatbox_shortcodes extends e_shortcode
 {
 
 	/**

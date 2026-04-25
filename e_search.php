@@ -51,7 +51,7 @@ class chatbox_menu_search extends e_search // include plugin-folder in the name.
 
 		$res = array();
 	
-		$res['link'] 		= e_PLUGIN."chatbox_menu/chat.php?".$row['cb_id'].".fs";
+		$res['link'] 		= e_PLUGIN."chatbox/chat.php?".$row['cb_id'].".fs";
 		$res['pre_title'] 	= LAN_SEARCH_7;
 		$res['title'] 		= $user[2];
 		$res['summary'] 	= $row['cb_message'];
@@ -90,5 +90,5 @@ class chatbox_menu_search extends e_search // include plugin-folder in the name.
 }
 
 //Old v1.
-// $search_info[] = array('sfile' => e_PLUGIN.'chatbox_menu/search/search_parser.php', 'qtype' => CB_SCH_LAN_1, 'refpage' => 'chat.php', 'advanced' => e_PLUGIN.'chatbox_menu/search/search_advanced.php');
+// $search_info[] = array('sfile' => e_PLUGIN.'chatbox/search/search_parser.php', 'qtype' => CB_SCH_LAN_1, 'refpage' => 'chat.php', 'advanced' => e_PLUGIN.'chatbox/search/search_advanced.php');
 

@@ -24,12 +24,12 @@ global $e107cache, $e_event, $e107;
 $tp = e107::getParser();
 $pref = e107::getPref();
 
-if(!e107::isInstalled('chatbox_menu'))
+if(!e107::isInstalled('chatbox'))
 {
 	return '';
 }
 
-e107::lan('chatbox_menu', e_LANGUAGE);
+e107::lan('chatbox', e_LANGUAGE);
 
 
 $emessage = '';
@@ -195,7 +195,7 @@ else
 	{
 
 		$oc =
-			"onclick=\"javascript:sendInfo('" . SITEURLBASE . e_PLUGIN_ABS . "chatbox_menu/chatbox_menu.php', 'chatbox_posts', this.form);\"";
+			"onclick=\"javascript:sendInfo('" . SITEURLBASE . e_PLUGIN_ABS . "chatbox/chatbox_menu.php', 'chatbox_posts', this.form);\"";
 
 	}
 	else
@@ -254,13 +254,13 @@ if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 	$qry = "SELECT c.*, u.user_name, u.user_image FROM #chatbox AS c
 	LEFT JOIN #user AS u ON SUBSTRING_INDEX(c.cb_nick, '.', 1) = u.user_id
 	ORDER BY c.cb_datestamp DESC LIMIT 0, " . (int) $chatbox_posts;
-
+ 
 	global $CHATBOXSTYLE;
 
 	if($CHATBOXSTYLE)  // legacy chatbox style
 	{
 		$legacyIconSrc = e_IMAGE_ABS . 'admin_images/chatbox_16.png';
-		$currentIconSrc = e_PLUGIN . 'chatbox_menu/images/chatbox_16.png';
+		$currentIconSrc = e_PLUGIN . 'chatbox/images/chatbox_16.png';
 
 		$legacySrch = array($legacyIconSrc, '{USERNAME}', '{MESSAGE}', '{TIMEDATE}');
 		$legacyRepl = array($currentIconSrc, '{CB_USERNAME}', '{CB_MESSAGE}', '{CB_TIMEDATE}');
@@ -272,7 +272,7 @@ if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 	}
 	else    // default chatbox style
 	{
-		$CHATBOX_TEMPLATE = e107::getTemplate('chatbox_menu', null, 'menu');
+		$CHATBOX_TEMPLATE = e107::getTemplate('chatbox', 'chatbox_menu', 'menu');
 	}
 
 	// FIX - don't call getScBatch() if don't need to globally register the methods
@@ -281,7 +281,7 @@ if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 	// the good way in this case - it works with any object having sc_*, models too
 	//$sc = new chatbox_shortcodes();
 
-	$sc = e107::getScBatch('chatbox_menu', true);
+	$sc = e107::getScBatch('chatbox', true);
 
 	if($sql->gen($qry))
 	{
@@ -312,7 +312,7 @@ if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 
 	if($total_chats > $chatbox_posts || CB_MOD)
 	{
-		$text .= "<br /><div style='text-align:center'><a href='" . e_PLUGIN_ABS . "chatbox_menu/chat.php'>" . (CB_MOD
+		$text .= "<br /><div style='text-align:center'><a href='" . e_PLUGIN_ABS . "chatbox/chat.php'>" . (CB_MOD
 				? CHATBOX_L13
 				: CHATBOX_L12) . '</a> (' . $total_chats . ')</div>';
 	}
