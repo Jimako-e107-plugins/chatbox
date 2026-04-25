@@ -255,25 +255,7 @@ if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 	LEFT JOIN #user AS u ON SUBSTRING_INDEX(c.cb_nick, '.', 1) = u.user_id
 	ORDER BY c.cb_datestamp DESC LIMIT 0, " . (int) $chatbox_posts;
  
-	global $CHATBOXSTYLE;
-
-	if($CHATBOXSTYLE)  // legacy chatbox style
-	{
-		$legacyIconSrc = e_IMAGE_ABS . 'admin_images/chatbox_16.png';
-		$currentIconSrc = e_PLUGIN . 'chatbox/images/chatbox_16.png';
-
-		$legacySrch = array($legacyIconSrc, '{USERNAME}', '{MESSAGE}', '{TIMEDATE}');
-		$legacyRepl = array($currentIconSrc, '{CB_USERNAME}', '{CB_MESSAGE}', '{CB_TIMEDATE}');
-
-
-		$CHATBOX_TEMPLATE['start'] = '';
-		$CHATBOX_TEMPLATE['item'] = str_replace($legacySrch, $legacyRepl, $CHATBOXSTYLE);
-		$CHATBOX_TEMPLATE['end'] = '';
-	}
-	else    // default chatbox style
-	{
-		$CHATBOX_TEMPLATE = e107::getTemplate('chatbox', 'chatbox_menu', 'menu');
-	}
+	$CHATBOX_TEMPLATE = e107::getTemplate('chatbox', 'chatbox_menu', 'menu');
 
 	// FIX - don't call getScBatch() if don't need to globally register the methods
 	// $sc = e107::getScBatch('chatbox');

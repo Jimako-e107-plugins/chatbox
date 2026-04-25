@@ -65,7 +65,7 @@ $texta .= "<div class='control-group form-group' id='chatbox-input-block'>";
 // ...80 more lines of string-concatenated HTML...
 ```
 
-The rewrite moves this into the e107 template system (`chatbox_template.php`) so the markup is editable as HTML rather than PHP, and so theme authors can override it without touching plugin code.
+The rewrite moves this into the e107 template system. Templates live in the `templates/` folder, one file per surface (the sidebar menu uses `chatbox_menu_template.php`, the standalone page uses `chatbox_template.php`), so the markup is editable as HTML rather than PHP, and so theme authors can override it without touching plugin code.
 
 ### 4. No inline styles, no inline event handlers
 
@@ -138,10 +138,13 @@ LAN_CHATBOX_100
 
 ```
 chatbox/
-├── chatbox.php                  # main plugin file (replaces chatbox_menu.php)
-├── chatbox_template.php         # all HTML templates (form + post list + emote panel)
-├── chatbox_shortcodes.php       # shortcode resolvers ({CB_USERNAME}, etc.)
-├── chatbox.js                   # extracted from inline event handlers
+├── chatbox_menu.php                # sidebar widget renderer (e107 menu file)
+├── chat.php                        # standalone page (full chat view + moderation)
+├── chatbox_shortcodes.php          # shortcode resolvers ({CB_USERNAME}, etc.)
+├── chatbox.js                      # extracted from inline event handlers
+├── templates/
+│   ├── chatbox_menu_template.php   # sidebar widget markup
+│   └── chatbox_template.php        # standalone page markup
 ├── languages/
 │   └── English/
 │       └── English_chatbox.php
@@ -151,12 +154,12 @@ chatbox/
 
 The split is deliberate:
 
-- `chatbox.php` contains plugin logic only — no HTML strings.
-- `chatbox_template.php` contains every piece of HTML the plugin emits.
+- `chatbox_menu.php` and `chat.php` contain plugin logic only — no HTML strings. The `_menu` suffix on `chatbox_menu.php` is required by e107 to register the file as a menu; the standalone page uses `chat.php` for historical compatibility with existing chatbox URLs.
+- `templates/` contains every piece of HTML the plugin emits, split per surface (menu / page).
 - `chatbox_shortcodes.php` contains the shortcode class.
 - `chatbox.js` contains the JavaScript previously embedded in `onclick=""` and `onkeyup=""` attributes.
 
-A theme author who wants to change markup edits `chatbox_template.php`. A developer who wants to change behavior edits `chatbox.php`. A theme author who wants to change appearance writes CSS targeting `.chatbox-*` classes. The three concerns don't bleed into each other.
+A theme author who wants to change markup edits the relevant template file in `templates/`. A developer who wants to change behavior edits `chatbox_menu.php` or `chat.php`. A theme author who wants to change appearance writes CSS targeting `.chatbox-*` classes. The three concerns don't bleed into each other.
 
 ---
 
@@ -164,7 +167,7 @@ A theme author who wants to change markup edits `chatbox_template.php`. A develo
 
 The plugin is theme-agnostic. Any theme can style it by targeting the `.chatbox-*` classes documented here. A reference theme integration exists as part of the **efiction** theme, but the plugin itself does not depend on any particular theme being installed.
 
-If you are a theme author and want your theme to style this plugin, the class names and DOM structure are stable as of version 1.0 — see `chatbox_template.php` for the canonical reference.
+If you are a theme author and want your theme to style this plugin, the class names and DOM structure are stable as of version 1.0 — see the files in `templates/` for the canonical reference.
 
 ---
 
