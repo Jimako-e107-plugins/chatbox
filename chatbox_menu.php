@@ -19,7 +19,7 @@ if(isset($_POST['chatbox_ajax']))
 	}
 }
 
-global $e107cache, $e_event, $e107;
+global $e107cache, $e107;
 
 $tp = e107::getParser();
 $pref = e107::getPref();
@@ -119,8 +119,6 @@ if((isset($_POST['chat_submit']) || e_AJAX_REQUEST) && $_POST['cmessage'] !== ''
 								'datestamp' => $datestamp,
 								'ip'        => $ip,
 							];
-
-							$e_event->trigger('cboxpost', $edata_cb); // deprecated
 
 							e107::getEvent()->trigger('user_chatbox_post_created', $edata_cb);
 							$e107cache->clear('nq_chatbox');

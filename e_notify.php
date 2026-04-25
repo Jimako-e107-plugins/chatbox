@@ -9,49 +9,31 @@
  */
 
 if (!defined('e107_INIT')) { exit; }
-/*
-if(defined('ADMIN_PAGE') && ADMIN_PAGE === true)
+
+
+class chatbox_notify extends notify // plugin-folder + '_notify'
 {
-//	$config_category = NT_LAN_CB_1;
-//	$config_events = array('cboxpost' => NT_LXAN_CB_2);
-}
-
-
-if (!function_exists('notify_cboxpost')) {
-	function notify_cboxpost($data) {
-		global $nt;
-		$message = NT_LAN_CB_3.': '.USERNAME.' ('.NT_LXAN_CB_4.': '.e107::getIPHandler()->ipDecode($data['ip']).' )<br />';
-		$message .= NT_LAN_CB_5.':<br />'.$data['cmessage'].'<br /><br />';
-		$nt -> send('cboxpost', NT_LAN_CB_6, $message);
-	}
-}
-*/
-
-
-// v2.x Standard 
-class chatbox_notify extends notify // plugin-folder + '_notify' 
-{		
 	function config()
 	{
-		
+
 		$config = array();
-	
+
 		$config[] = array(
 			'name'			=> NT_LAN_CB_2, //  "Message posted"
-			'function'		=> "cboxpost",
+			'function'		=> "user_chatbox_post_created",
 			'category'		=> ''
-		);	
-		
+		);
+
 		return $config;
 	}
-	
-	function cboxpost($data) 
+
+	function user_chatbox_post_created($data)
 	{
-	
+
 		$message = NT_LAN_CB_3.': '.USERNAME.' ('.LAN_IP.': '.e107::getIPHandler()->ipDecode($data['ip']).' )<br />';
 		$message .= NT_LAN_CB_5.':<br />'.$data['cmessage'].'<br /><br />';
-		
-		$this->send('cboxpost', NT_LAN_CB_6, $message);
+
+		$this->send('user_chatbox_post_created', NT_LAN_CB_6, $message);
 	}
-	
+
 }
