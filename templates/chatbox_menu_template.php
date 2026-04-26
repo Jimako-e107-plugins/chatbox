@@ -16,16 +16,16 @@ if ( ! defined('e107_INIT')) {
 //---------------------------------MENU-----------------------------------------
 
 $CHATBOX_MENU_TEMPLATE['menu']['start'] =
-	'<ul class="media-list unstyled list-unstyled mt-3">' . PHP_EOL;
+	'<ul class="chatbox-message-list list-unstyled mt-3">' . PHP_EOL;
 
 $CHATBOX_MENU_TEMPLATE['menu']['item'] 	= '
-<li class="media d-flex mb-2">
-<div class="media-left me-3">
-	<span class="media-object mr-3">{CB_AVATAR: size=48&shape=circle}</span>
-</div> 
-<div class="media-body">
+<li class="chatbox-message d-flex mb-2">
+<div class="chatbox-message-avatar flex-shrink-0 me-3">
+	<span>{CB_AVATAR: size=48&shape=circle}</span>
+</div>
+<div class="chatbox-message-body flex-grow-1">
 	<b>{CB_USERNAME}</b>&nbsp;
-	<small class="muted smalltext">{CB_TIMEDATE}</small><br />
+	<small class="chatbox-timestamp text-muted">{CB_TIMEDATE}</small><br />
 	<p>{CB_MESSAGE}</p>
 </div>
 </li>' . PHP_EOL;
