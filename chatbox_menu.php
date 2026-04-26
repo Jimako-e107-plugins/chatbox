@@ -19,8 +19,6 @@ if(isset($_POST['chatbox_ajax']))
 	}
 }
 
-global $e107cache, $e107;
-
 $tp = e107::getParser();
 $pref = e107::getPref();
 
@@ -121,7 +119,7 @@ if((isset($_POST['chat_submit']) || e_AJAX_REQUEST) && $_POST['cmessage'] !== ''
 							];
 
 							e107::getEvent()->trigger('user_chatbox_post_created', $edata_cb);
-							$e107cache->clear('nq_chatbox');
+							e107::getCache()->clear('nq_chatbox');
 						}
 
 					}
@@ -232,8 +230,6 @@ if($emessage !== '')
 
 if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 {
-
-	global $pref, $tp;
 
 	$pref['chatbox_posts'] = (!empty($pref['chatbox_posts']) ? (int) $pref['chatbox_posts'] : 10);
 
