@@ -167,18 +167,16 @@ else
 	if(varset($pref['cb_layer']) === 2)
 	{
 
-		$texta = "\n<form id='chatbox' action='" . e_SELF . '?' . e_QUERY . "'  method='post' onsubmit='return(false);'>
+		$texta = "<form id='chatbox' action='" . e_REQUEST_SELF . "' method='post' onsubmit='return(false);'>
 		<div>
 			<input type='hidden' name='chatbox_ajax' id='chatbox_ajax' value='1' />
 		</div>";
-
 	}
 	else
 	{
 
-		$texta = (e_QUERY
-			? "\n<form id='chatbox' method='post' action='" . e_SELF . '?' . e_QUERY . "'>"
-			: "\n<form id='chatbox' method='post' action='" . e_SELF . "'>");
+		$texta = "<form id='chatbox' method='post' action='" . e_REQUEST_SELF . "'>";
+	 
 	}
 
 	$texta .= "<div class='chatbox-input-block' id='chatbox-input-block'>";
