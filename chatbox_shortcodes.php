@@ -223,7 +223,7 @@ class chatbox_shortcodes extends e_shortcode
 		{
 			$id = $this->var['cb_id'];
 
-			$modControls .= "<span class='checkbox'>";
+			$modControls .= "<span class='chatbox-mod-controls'>";
 
 			$modControls .= $frm->checkbox('delete[' . $id . ']', 1, false,
 				array('inline' => true, 'label' => LAN_DELETE));
@@ -256,7 +256,7 @@ class chatbox_shortcodes extends e_shortcode
 	public function sc_cb_blocked($parm = null)
 	{
 
-		return $this->var['cb_blocked'] ? '<span class="label label-warning">' . CHATBOX_L25 . '</span>' : '';
+		return $this->var['cb_blocked'] ? '<span class="badge text-bg-warning chatbox-blocked-badge">' . CHATBOX_L25 . '</span>' : '';
 	}
 
 }

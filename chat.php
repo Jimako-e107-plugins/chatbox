@@ -178,14 +178,14 @@ if (CB_MOD) {
 	$text =
 		"<form method='post' action='" . e_SELF . "'>"
 		. $text .
-		"<input type='submit' class='btn btn-danger btn-secondary button float-right pull-right' name='moderate' value='" . CHATBOX_L13 . "' />
+		"<input type='submit' class='button btn btn-danger float-end chatbox-moderate-submit' name='moderate' value='" . CHATBOX_L13 . "' />
 		</form>";
 
 }
 
 $parms = "{$chat_total},30,{$from}," . e_SELF . '?[FROM]';
 
-$text .= "<div class='nextprev'>" . $tp->parseTemplate("{NEXTPREV={$parms}}") . '</div>';
+$text .= "<div class='nextprev chatbox-pagination'>" . $tp->parseTemplate("{NEXTPREV={$parms}}") . '</div>';
 
 $ns->tablerender(CHATBOX_L20, $mes->render() . $text);
 

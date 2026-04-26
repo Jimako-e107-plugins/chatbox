@@ -16,20 +16,20 @@ if ( ! defined('e107_INIT')) {
 //---------------------------------LIST-----------------------------------------
 
 $CHATBOX_TEMPLATE['list']['start'] =
-	'<ul class="media-list list-group">' . PHP_EOL;
+	'<ul class="chatbox-message-list list-group">' . PHP_EOL;
 
 $CHATBOX_TEMPLATE['list']['item']  = '
-<li class="media list-group-item" >
-<div class="media-left">
-	<span class="media-object">{CB_AVATAR:size=60}</span>
+<li class="chatbox-message list-group-item d-flex" >
+<div class="chatbox-message-avatar flex-shrink-0 me-3">
+	<span>{CB_AVATAR:size=60}</span>
 </div>
-<div class="media-body">
-	<h4 class="media-heading" style="display: inline !important;">{CB_USERNAME}</h4>
-	<small class="label label-default pull-right float-right">{CB_TIMEDATE}</small><br>
-	<p>{CB_MESSAGE}</p>
-	<div>
-		<div class="pull-left float-left">{CB_BLOCKED}</div>
-		<div class="pull-right float-right">{CB_MOD}</div>
+<div class="chatbox-message-body flex-grow-1">
+	<div class="h4 d-inline chatbox-username">{CB_USERNAME}</div>
+	<small class="chatbox-timestamp text-muted float-end">{CB_TIMEDATE}</small><br>
+	<p class="chatbox-message-text">{CB_MESSAGE}</p>
+	<div class="chatbox-message-footer">
+		<div class="chatbox-blocked-wrap float-start">{CB_BLOCKED}</div>
+		<div class="chatbox-mod-wrap float-end">{CB_MOD}</div>
 	</div>
 </div>
 </li>'. PHP_EOL;
