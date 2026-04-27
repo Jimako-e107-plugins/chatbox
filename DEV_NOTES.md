@@ -73,8 +73,35 @@ chatbox/
 return format. Three types are used:
 
 - `English_global.php` — autoloaded by core via the `lan_global_list`
-  pref (`class2.php`). Constants here must follow `LAN_PLUGIN_{FOLDER}_*`
-  to avoid cross-plugin conflicts.
+  pref (`class2.php`). Holds three categories of constants, all of
+  which need to be loaded for every request:
+
+  1. **Plugin descriptors** (`LAN_PLUGIN_CHATBOX_MENU_NAME`,
+     `LAN_PLUGIN_CHATBOX_MENU_DESCRIPTION`,
+     `LAN_PLUGIN_CHATBOX_MENU_POSTS`). Schema is fixed:
+     `LAN_PLUGIN_{FOLDER}_*`. e107 core looks these up via
+     `e107::getPlugLan('chatbox', '<type>')`, which builds the
+     constant name by concatenating the prefix and uppercasing the
+     arguments — so the name has to match exactly.
+  2. **Admin log labels** (`LAN_AL_CHBLAN_02`). When admin code calls
+     `e107::getLog()->add('CHBLAN_02', …)`, core resolves the event
+     code to a constant named `LAN_AL_<event_code>` at log render
+     time. Render happens on `admin_log.php`, which is outside the
+     plugin's own entry points, so the constant must be available
+     without an explicit `plugLan()` call.
+  3. **Notify trigger labels** (`NT_LAN_CB_2`, `NT_LAN_CB_3`,
+     `NT_LAN_CB_5`, `NT_LAN_CB_6`). Used in the `chatbox_notify`
+     class config array inside `e_notify.php`. e107 loads
+     `e_notify.php` from the notify subsystem (e.g. when admin opens
+     the notify config page, or when an event triggers a
+     notification) outside the plugin's front-end entry points, so
+     the constants must be available without an explicit
+     `plugLan()` call.
+
+  Names in categories 2 and 3 do not follow `LAN_PLUGIN_{FOLDER}_*`,
+  but they're held in place by the e107 conventions for those
+  subsystems — `LAN_AL_*` for admin log, `NT_LAN_*` for notify.
+  Renaming them would break their integration with core.
 - `English_front.php` — loaded explicitly by `chatbox_menu.php` and
   `chat.php` via `e107::plugLan('chatbox', 'front', true)`.
 - `English_admin.php` — loaded explicitly by `admin_chatbox.php` via
@@ -363,15 +390,13 @@ These are filed (or to be filed) as separate issues:
   names (`LAN_CHATBOX_PLACEHOLDER`, `LAN_CHATBOX_SUBMIT`, etc.). Touches
   language files and every reference site; deliberately not bundled with
   markup PRs.
-- **Global constant naming compliance** — `LAN_AL_CHBLAN_*` and
-  `NT_LAN_CB_*` live in `English_global.php` (autoloaded) but don't
-  follow `LAN_PLUGIN_{FOLDER}_*`. Rename and update reference sites in
-  `admin_chatbox.php` and `e_notify.php`.
 - **`e_list.php` LAN dependency bug** — references `CHATBOX_L6` without
   loading `English_front.php`, and references `LIST_CHATBOX_2` which is
   not defined anywhere in the plugin.
-- **Dead constants cleanup** — `LAN_AL_CHBLAN_03/04/05` and
-  `NT_LAN_CB_1` are defined but unused. Audit and remove.
+- **Dead constants cleanup** — `LAN_AL_CHBLAN_01/03/04/05` and
+  `NT_LAN_CB_1` are defined in `English_global.php` but unused. Audit
+  and remove. Several `CHATBOX_L*` and `CHBLAN_*` may also be unused —
+  audit at the same time.
 
 Order is roughly the order above, but not strict — small cleanup tasks
 are good warm-ups between larger themes.
