@@ -169,7 +169,7 @@ else
 	if(varset($pref['cb_layer']) === 2)
 	{
 
-		$texta = "<form id='chatbox' action='" . e_REQUEST_SELF . "' method='post' onsubmit='return(false);'>
+		$texta = "<form id='chatbox' action='" . e_REQUEST_SELF . "' method='post'>
 		<div>
 			<input type='hidden' name='chatbox_ajax' id='chatbox_ajax' value='1' />
 		</div>";
@@ -192,8 +192,9 @@ else
 	if($pref['cb_layer'] === 2)
 	{
 
-		$oc =
-			"onclick=\"javascript:sendInfo('" . SITEURLBASE . e_PLUGIN_ABS . "chatbox/chatbox_menu.php', 'chatbox_posts', this.form);\"";
+		$oc = "data-chatbox-ajax='1'"
+			. " data-chatbox-ajax-url='" . SITEURLBASE . e_PLUGIN_ABS . "chatbox/chatbox_menu.php'"
+			. " data-chatbox-ajax-target='chatbox_posts'";
 
 	}
 	else
@@ -205,7 +206,7 @@ else
 
 	$texta .= '
 	<textarea placeholder="' . LAN_CHATBOX_100 . "\" required class='chatbox-message-input form-control' id='cmessage' name='cmessage' cols='20' rows='5' style='max-width:97%; " . ($cb_width
-			? 'width:' . $cb_width . ';' : '') . " overflow: auto' onselect='storeCaret(this);' onclick='storeCaret(this);' onkeyup='storeCaret(this);'></textarea>
+			? 'width:' . $cb_width . ';' : '') . " overflow: auto'></textarea>
 	<br />
 	<input class='button btn btn-sm btn-primary chatbox-submit' type='submit' id='chat_submit' name='chat_submit' value='" . CHATBOX_L4 . "' {$oc}/>";
 
@@ -216,7 +217,7 @@ else
 	if(!empty($pref['cb_emote']) && !empty($pref['smiley_activate']))
 	{
 		$texta .= "
-		<input class='button btn btn-sm btn-secondary chatbox-emotes-toggle' type='button' style='cursor:pointer' size='30' value='" . CHATBOX_L14 . "' onclick=\"expandit('emote')\" />
+		<input class='button btn btn-sm btn-secondary chatbox-emotes-toggle' type='button' style='cursor:pointer' size='30' value='" . CHATBOX_L14 . "' data-chatbox-emote-toggle='emote' />
 		<div class='chatbox-emotes-panel' style='display:none' id='emote'>" . r_emote() . "</div>\n";
 	}
 

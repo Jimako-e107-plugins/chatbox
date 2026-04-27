@@ -21,7 +21,7 @@ Repo: https://github.com/Jimako-e107-plugins/chatbox
 Fork point: the original e107 core plugin `chatbox_menu` (renamed to
 `chatbox`).
 
-Last updated: 2026-04-27.
+Last updated: 2026-04-27 (after JS extraction PR — menu surface).
 
 ---
 
@@ -305,6 +305,84 @@ now been removed.
 elsewhere in the codebase are legacy and should be replaced by
 `e107::getEvent()`. Track separately if found.
 
+### 3.9 JS architecture — behavior layer
+
+**Decision:** Inline JS handlers move out of `chatbox_menu.php` into a
+single `chatbox.js`, registered as an `e107.behaviors.chatboxMenu`
+attach handler and loaded via `e107::js('chatbox', 'chatbox.js', 'jquery')`.
+
+**Why behaviors and not plain `$(document).ready`:** behaviors give a
+defined hook for AJAX-replaced content via `e107.attachBehaviors()`,
+they're the e107 idiomatic pattern, and `.once()` makes double-binding
+guards trivial.
+
+**Decision: every listener is delegated from `document`.**
+
+In AJAX mode (`cb_layer === 2`), submitting the form makes the legacy
+`sendInfo()` core helper replace the entire contents of
+`#chatbox_posts` with the server response — and the response includes
+a fresh copy of the whole form. Listeners bound directly to the form
+or its children would die with the old DOM, and `sendInfo()` does
+**not** call `e107.attachBehaviors()` on the new content, so a
+re-attach won't run on its own. Document-delegated listeners survive
+every AJAX swap with no re-bind.
+
+This shaped two follow-on conventions:
+
+- The `.once('chatbox-menu')` marker is anchored on `document`, not on
+  any element inside the form. Registration runs once per page load.
+- `attach(context, settings)` doesn't iterate `context` for these
+  listeners — `document` is the only target, and it's stable.
+
+**Decision: legacy core helpers stay.**
+
+`storeCaret`, `addtext`, `sendInfo`, `expandit`, and the click handler
+injected by `r_emote()` are all e107 core code. The behavior **calls**
+them, doesn't replace them. Defensive
+`typeof window.X === 'function'` guards everywhere so the behavior
+fails gracefully if `e_jslib` is disabled.
+
+**Why not modernize:** option 2 from issue #7 (replace
+`storeCaret`/`addtext` with `selectionStart`/`setRangeText`) was
+considered. Rejected for this PR because the modernization would also
+require replacing the click handler injected by `r_emote()` — which is
+a core function emitting both HTML and a jQuery click binding in one
+call. Touching that expands scope from "extract local handlers" to
+"reimplement the emote panel from scratch." Tracked as a separate
+theme; may end up as an upstream e107 PR.
+
+**Decision: `data-*` attributes bridge PHP to JS.**
+
+Where the inline handler used to embed config (URLs, panel IDs) into
+`onclick="..."`, the PHP side now writes that config to `data-*`
+attributes on the same element, and the behavior reads it back:
+
+| Inline (before) | Data attributes (after) |
+|---|---|
+| `onclick="javascript:sendInfo(URL, 'chatbox_posts', this.form);"` | `data-chatbox-ajax='1' data-chatbox-ajax-url='URL' data-chatbox-ajax-target='chatbox_posts'` |
+| `onclick="expandit('emote')"` | `data-chatbox-emote-toggle='emote'` |
+
+The behavior is not coupled to literal IDs like `'emote'` or
+`'chatbox_posts'` — those stay PHP/template concerns. The behavior
+just reads what the markup tells it.
+
+**Bug fixes folded into the extraction:**
+
+1. **Issue #7 (emote insert on first interaction).** Pre-existing.
+   The emote-toggle handler now calls `textarea.focus()` after
+   opening the panel; the focus listener calls `storeCaret`, priming
+   the caret position. Document-delegated workaround from the
+   earlier fix-#7 PR has been removed — its job is now done by the
+   unified handler.
+2. **HTML5 `required` bypassed in AJAX mode.** Pre-existing in the
+   inline-`onclick` code. `event.preventDefault()` on the submit
+   button skipped native validation; behavior now calls
+   `form.checkValidity()` / `form.reportValidity()` before
+   `sendInfo()`.
+
+**Scope limit:** menu surface only. `chat.php` keeps its inline
+handlers for now and is handled in a follow-up PR per DEV_NOTES §4.3.
+
 ---
 
 ## 4. Working conventions
@@ -377,8 +455,17 @@ These are filed (or to be filed) as separate issues:
 - **Shortcode HTML extraction** — accept `class=` parameter on every
   shortcode that returns HTML; add default classes; standardize the
   pattern.
-- **JS extraction** — move inline `onclick` / `onkeyup` / `onsubmit` /
-  `onselect` into `chatbox.js`.
+- **JS extraction — page surface** — apply the same behavior pattern
+  to `chat.php` (inline handlers there have not been audited yet).
+  Menu surface landed in [PR ref] / closes the JS-extraction-menu
+  issue.
+- **Modernize legacy caret/text helpers** — replace `storeCaret` /
+  `addtext` calls with native `textarea.selectionStart` /
+  `setRangeText`. Not contained to the plugin: the click handler
+  injected by `r_emote()` in e107 core also calls `addtext`, so a
+  full modernization either replaces the emote panel HTML
+  (plugin-side workaround) or fixes `r_emote` upstream (preferred).
+  Option 2 from issue #7's diagnosis.
 - **Inline-style cleanup** — extract `style="..."` attributes to CSS.
 - **Notify message body cleanup** — `NT_LAN_CB_*` constants and the HTML
   inside the notify message body.
