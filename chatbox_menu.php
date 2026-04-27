@@ -179,7 +179,7 @@ else
 	 
 	}
 
-	$texta .= "<div class='chatbox-input-block' id='chatbox-input-block'>";
+	$texta .= "<div class='chatbox-input-block text-center' id='chatbox-input-block'>";
 
 	if(($pref['anon_post'] == '1' && USER === false))
 	{
