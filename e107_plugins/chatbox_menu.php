@@ -31,6 +31,8 @@ if(!e107::isInstalled('chatbox'))
 
 e107::plugLan('chatbox', 'front', true);
 
+e107::js('chatbox', 'chatbox.js', 'jquery');
+
 
 $emessage = '';
 
