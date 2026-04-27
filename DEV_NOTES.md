@@ -21,7 +21,7 @@ Repo: https://github.com/Jimako-e107-plugins/chatbox
 Fork point: the original e107 core plugin `chatbox_menu` (renamed to
 `chatbox`).
 
-Last updated: 2026-04-27 (after JS extraction PR — menu surface).
+Last updated: 2026-04-27 (after JS extraction PR — menu surface; goal #3 closed).
 
 ---
 
@@ -37,7 +37,7 @@ get mixed** into a single PR:
    hooks; Bootstrap 5 utility classes for layout inside templates only;
    no dead BS3/BS4 leftovers anywhere.
 3. **Behavior separated from markup.** JavaScript lives in `chatbox.js`,
-   not in inline `onclick=""` attributes.
+   not in inline `onclick=""` attributes. **(achieved — see §3.9.)**
 
 Each goal is a separate theme (= separate issue / PR).
 
@@ -380,8 +380,15 @@ just reads what the markup tells it.
    `form.checkValidity()` / `form.reportValidity()` before
    `sendInfo()`.
 
-**Scope limit:** menu surface only. `chat.php` keeps its inline
-handlers for now and is handled in a follow-up PR per DEV_NOTES §4.3.
+**Scope:** the menu PR was originally framed as the first of two
+surface PRs (menu first, page next). Audit of `chat.php`,
+`chatbox_shortcodes.php`, and the two template files turned up zero
+inline JS handlers, zero `<script>` blocks, and zero direct calls to
+the legacy core JS helpers (`storeCaret`, `addtext`, `sendInfo`,
+`expandit`, `r_emote`). The page surface uses native form submission
+for moderator actions; emote/caret/AJAX behavior only exists on the
+menu surface. Goal #3 is therefore complete after the menu PR — no
+follow-up surface PR is needed.
 
 ---
 
@@ -455,10 +462,6 @@ These are filed (or to be filed) as separate issues:
 - **Shortcode HTML extraction** — accept `class=` parameter on every
   shortcode that returns HTML; add default classes; standardize the
   pattern.
-- **JS extraction — page surface** — apply the same behavior pattern
-  to `chat.php` (inline handlers there have not been audited yet).
-  Menu surface landed in [PR ref] / closes the JS-extraction-menu
-  issue.
 - **Modernize legacy caret/text helpers** — replace `storeCaret` /
   `addtext` calls with native `textarea.selectionStart` /
   `setRangeText`. Not contained to the plugin: the click handler
