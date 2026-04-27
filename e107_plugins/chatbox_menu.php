@@ -29,7 +29,7 @@ if(!e107::isInstalled('chatbox'))
 	return '';
 }
 
-e107::lan('chatbox', e_LANGUAGE);
+e107::plugLan('chatbox', 'front', true);
 
 
 $emessage = '';

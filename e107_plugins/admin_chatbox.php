@@ -18,9 +18,7 @@ if (!e107::isInstalled('chatbox') || !getperms("P"))
 	exit;
 }
 
-// include_lXXXan( e_PLUGIN."chatbox/languages/".e_LANGUAGE."/admin_chatbox_menu.php");
-
-e107::lan('chatbox','admin_chatbox_menu');
+e107::plugLan('chatbox', 'admin', true);
 
 
 require_once(e_ADMIN."auth.php");

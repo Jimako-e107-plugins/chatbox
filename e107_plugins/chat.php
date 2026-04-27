@@ -15,7 +15,7 @@ if ( ! e107::isInstalled('chatbox')) {
 	exit;
 }
 
-e107::lan('chatbox', e_LANGUAGE);
+e107::plugLan('chatbox', 'front', true);
 
 require_once(HEADERF);
 $mes = e107::getMessage();
