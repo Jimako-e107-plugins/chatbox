@@ -84,54 +84,6 @@ This is a refactor, not a feature change. The fork must keep working:
 - Cache integration
 - Event triggers (`cboxpost`, `user_chatbox_post_created`)
 
-Language constants (`CHATBOX_L1`, `LAN_CHATBOX_100`, etc.) remain unchanged.
-
----
-
-## Naming conventions
-
-This fork follows simple, consistent conventions. They are documented here so contributors and theme authors know what to expect.
-
-### CSS classes
-
-The plugin folder name is the prefix. No vendor or family prefix:
-
-```
-.chatbox-message
-.chatbox-input-block
-.chatbox-emotes-toggle
-.chatbox-username
-.chatbox-mod-controls
-```
-
-This matches how WordPress, Drupal, and most plugin ecosystems handle namespacing. The plugin owns its namespace; cross-plugin consistency comes from naming patterns, not shared prefixes. The plugin remains neutral and reusable outside any particular theme.
-
-### Database tables
-
-e107's existing `e107_` table prefix is sufficient. No additional namespace.
-
-```
-e107_chatbox
-```
-
-### PHP class and function names
-
-Plugin folder name as prefix:
-
-```
-chatbox_shortcodes
-chatbox_install
-```
-
-### Language constants
-
-e107 convention is preserved:
-
-```
-CHATBOX_L1
-LAN_CHATBOX_100
-```
-
 ---
 
 ## File structure
@@ -140,34 +92,34 @@ LAN_CHATBOX_100
 chatbox/
 ├── chatbox_menu.php                # sidebar widget renderer (e107 menu file)
 ├── chat.php                        # standalone page (full chat view + moderation)
+├── admin_chatbox.php               # admin settings page
 ├── chatbox_shortcodes.php          # shortcode resolvers ({CB_USERNAME}, etc.)
-├── chatbox.js                      # extracted from inline event handlers
+├── chatbox_sql.php                 # database schema
+├── chatbox.js                      # client-side behavior
 ├── templates/
 │   ├── chatbox_menu_template.php   # sidebar widget markup
 │   └── chatbox_template.php        # standalone page markup
 ├── languages/
 │   └── English/
-│       └── English_chatbox.php
+│       ├── English_front.php       # front-end strings
+│       ├── English_admin.php       # admin strings
+│       └── English_global.php      # globally-loaded strings
+├── e_*.php                         # e107 integration hooks (notify, search, etc.)
 ├── plugin.xml
 └── README.md
 ```
 
-The split is deliberate:
+A theme author who wants to change markup edits the relevant file in `templates/`. A developer who wants to change behavior edits `chatbox_menu.php` or `chat.php`. A theme author who wants to change appearance writes CSS targeting `.chatbox-*` classes.
 
-- `chatbox_menu.php` and `chat.php` contain plugin logic only — no HTML strings. The `_menu` suffix on `chatbox_menu.php` is required by e107 to register the file as a menu; the standalone page uses `chat.php` for historical compatibility with existing chatbox URLs.
-- `templates/` contains every piece of HTML the plugin emits, split per surface (menu / page).
-- `chatbox_shortcodes.php` contains the shortcode class.
-- `chatbox.js` contains the JavaScript previously embedded in `onclick=""` and `onkeyup=""` attributes.
-
-A theme author who wants to change markup edits the relevant template file in `templates/`. A developer who wants to change behavior edits `chatbox_menu.php` or `chat.php`. A theme author who wants to change appearance writes CSS targeting `.chatbox-*` classes. The three concerns don't bleed into each other.
+For a deeper walkthrough of the file layout and conventions, see [`DEV_NOTES.md`](DEV_NOTES.md).
 
 ---
 
 ## Themes targeting this plugin
 
-The plugin is theme-agnostic. Any theme can style it by targeting the `.chatbox-*` classes documented here. A reference theme integration exists as part of the **efiction** theme, but the plugin itself does not depend on any particular theme being installed.
+The plugin is theme-agnostic. Any theme can style it by targeting the `.chatbox-*` classes — see the files in `templates/` for the canonical DOM and class reference. A reference theme integration exists as part of the **efiction** theme, but the plugin itself does not depend on any particular theme being installed.
 
-If you are a theme author and want your theme to style this plugin, the class names and DOM structure are stable as of version 1.0 — see the files in `templates/` for the canonical reference.
+The class names and DOM structure are stable as of version 1.0.
 
 ---
 
@@ -177,23 +129,17 @@ This plugin is part of a longer-term project to build an **efiction** distributi
 
 The plugin itself is not branded as efiction and carries no efiction-specific prefixes, classes, or assumptions. It is meant to be useful to the wider e107 community, including users who do not run the efiction theme.
 
-Other plugins in the efiction distribution will follow the same conventions documented here (plugin-name CSS prefix, template-based HTML, Bootstrap 5 only, etc.) so that themes targeting one plugin in the family will recognize patterns from the others.
+Other plugins in the efiction distribution will follow the same conventions (plugin-name CSS prefix, template-based HTML, Bootstrap 5 only, etc.) so that themes targeting one plugin in the family will recognize patterns from the others.
 
 ---
 
 ## Contributing
 
-Discussion and feedback welcome via GitHub issues. The rewrite is being done in stages:
+Discussion and feedback welcome via GitHub issues and pull requests.
 
-1. **Inventory pass** — catalog every HTML element the original plugin emits (form inputs, post list items, mod controls, emote picker, error messages), with current classes and inline styles. *No code changes yet — this is mapping.*
-2. **Naming convention finalized** — see [Naming conventions](#naming-conventions) above.
-3. **Rewrite `chatbox_template.php` first** — smallest, most contained file. Validates the approach before tackling the larger files.
-4. **Rewrite `chatbox.php`** — the main file, where the form HTML currently lives in PHP strings.
-5. **Rewrite `chatbox_shortcodes.php`** — shortcode output cleaned up to match new conventions.
-6. **Extract JavaScript** to `chatbox.js`.
-7. **Documentation pass** — class reference, template override examples, theming guide.
+The rewrite is being done in stages, tracked in [`DEV_NOTES.md`](DEV_NOTES.md). That file also documents the conventions used (CSS, file layout, language constants, etc.) — worth a read before opening a PR.
 
-If you want to help with any stage, comment on the relevant issue or open a PR. Discussion of conventions is especially welcome before code is written for them.
+Discussion of conventions is welcome before code is written for them.
 
 ---
 
