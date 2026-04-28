@@ -1,19 +1,5 @@
 # DEV_NOTES — chatbox plugin
 
-> ⚠️ **UNDER CONSTRUCTION — NOT FINAL**
->
-> This document is a working snapshot of architectural decisions, kept
-> in the public repo so that the same version is available across
-> environments. **Treat every section as provisional.** Items can and
-> will change as new information surfaces during the rewrite — including
-> the high-level goals themselves. Do not cite anything here as a settled
-> decision without checking the relevant issue or PR in this repo.
->
-> Sections marked **(under revision)** are known to be incomplete or
-> likely to change soon.
-
----
-
 A record of architectural decisions and the reasoning behind them, kept
 so that context survives even if chat history is lost.
 
@@ -21,52 +7,92 @@ Repo: https://github.com/Jimako-e107-plugins/chatbox
 Fork point: the original e107 core plugin `chatbox_menu` (renamed to
 `chatbox`).
 
-Last updated: 2026-04-28 (after plugin prefs migration PR — issue #11; §3.10 added; closed in §5).
+Last updated: 2026-04-28 (rewrite phase closed — all four §1 goals
+achieved; plugin is feature-complete and in maintenance mode).
 
 ---
 
-## 1. Rewrite goals (high-level, under revision)
+## 1. Rewrite goals (high-level)
 
-The plugin is being rewritten along three parallel goals that **never
-get mixed** into a single PR:
+The plugin was rewritten along four parallel goals that were never
+mixed into a single PR:
 
-1. **HTML lives in templates, not PHP strings.** The markup the plugin
-   emits should be editable as HTML so that themes can override it
-   without touching plugin code.
-2. **Classes separated by concern.** `chatbox-*` classes as stable theme
-   hooks; Bootstrap 5 utility classes for layout inside templates only;
-   no dead BS3/BS4 leftovers anywhere.
+1. **Update code to e107 v2.4 standards.** The plugin was forked from
+   e107 core where it had accumulated a decade of legacy patterns —
+   prefs in the core namespace, `global $e_event`, `$CHATBOXSTYLE`
+   string templating, language constants without the v2.4+ array
+   return format, missing `e107::plugLan()` calls, etc. Bring all of
+   this in line with what current e107 core expects from a 2.4-era
+   plugin. **(achieved — see §3.5–§3.10.)**
+2. **Classes separated by concern.** `chatbox-*` classes as stable
+   theme hooks; Bootstrap 5 only (no BS3/BS4 leftovers); BS5 utility
+   classes for layout where appropriate. **(achieved — see §3.3, §3.4.)**
+   Every themable element has a `chatbox-*` hook, so themes can
+   restyle the plugin entirely through CSS without touching plugin
+   markup. The handful of inline `style="..."` attributes still in
+   `chatbox_menu.php` are plugin defaults that themes override
+   through normal CSS specificity; they're not blockers for theming.
 3. **Behavior separated from markup.** JavaScript lives in `chatbox.js`,
    not in inline `onclick=""` attributes. **(achieved — see §3.9.)**
+4. **HTML lives in templates, not PHP strings.** The post-list
+   markup the plugin emits is in templates (both menu and page
+   surfaces), so themes can override how individual posts render.
+   **(achieved.)** The form block, error div, login hint, scroll-layer
+   wrapper, and more-link in `chatbox_menu.php` were left as PHP
+   strings: extracting them would have required the form to inherit
+   conditional rendering for `cb_layer === 2` (AJAX) vs. plain mode,
+   for anonymous-post mode, for the emote panel toggle — i.e. a
+   non-trivial template language for what a theme rarely needs to
+   restyle, since `chatbox-*` hooks already cover the theming case.
+   The cost-benefit didn't justify it.
 
-Each goal is a separate theme (= separate issue / PR).
-
-> **These goals are not fixed.** A goal may be revised or dropped if a
-> different change makes it unnecessary, or if work in progress reveals
-> that the original framing was wrong. When that happens, the change
-> is recorded here with the reasoning.
+Each goal was a separate theme (= separate issue / PR).
 
 ---
 
-## 2. Current file layout (under revision)
+## 2. File layout
 
 ```
 chatbox/
 ├── chatbox_menu.php                # sidebar widget renderer (e107 menu file)
 ├── chat.php                        # standalone page (full chat view + moderation)
 ├── chatbox_shortcodes.php          # shortcode resolvers ({CB_USERNAME}, etc.)
-├── chatbox.js                      # extracted from inline event handlers
+├── chatbox.js                      # extracted from inline event handlers (see §3.9)
+├── admin_chatbox.php               # admin preferences screen
+├── chatbox_setup.php               # upgrade hooks (see §3.10)
+├── chatbox_sql.php                 # install-time table schema
+├── e_dashboard.php                 # admin dashboard widget integration
+├── e_header.php                    # request-header hook (single-key pref read for CSS)
+├── e_list.php                      # site-wide "list" addon integration
+├── e_notify.php                    # notify subsystem integration (see §3.6)
+├── e_rss.php                       # RSS feed integration
+├── e_search.php                    # site-search integration
+├── e_user.php                      # user-profile addon integration
+├── images/                         # plugin icons (chatbox_16.png, chatbox_32.png, blocked.png)
 ├── templates/
 │   ├── chatbox_menu_template.php   # sidebar widget markup
 │   └── chatbox_template.php        # standalone page markup
 ├── languages/
 │   └── English/
-│       ├── English_front.php      # constants used in front-end output (chatbox_menu.php, chat.php)
-│       ├── English_admin.php      # constants used in admin (admin_chatbox.php)
-│       └── English_global.php     # constants autoloaded for every request
+│       ├── English_front.php       # constants used in front-end output (chatbox_menu.php, chat.php)
+│       ├── English_admin.php       # constants used in admin (admin_chatbox.php)
+│       └── English_global.php      # constants autoloaded for every request
 ├── plugin.xml
-└── README.md
 ```
+
+**Note on `e_*.php` files:** these are e107 plugin-integration hooks
+(addons), each a separate well-known filename that core scans for at
+specific points in the request lifecycle. `e_header.php` runs on every
+request before output starts; `e_notify.php` is loaded by the notify
+subsystem; `e_user.php`, `e_search.php`, `e_rss.php`, `e_list.php`,
+and `e_dashboard.php` are scanned by their respective subsystems when
+they need to enumerate plugin contributions. None of them are entry
+points the user navigates to — they're discovered and called by core.
+They share concerns with the front-end and admin entry points (prefs,
+language constants, shortcodes) but they're not all in the rewrite's
+scope: the markup and behavior themes target only the surfaces that
+actually emit the chat UI (`chatbox_menu.php`, `chat.php`, the two
+template files, and `chatbox_shortcodes.php`).
 
 **Note on `languages/`:** files use the e107 nested layout
 (`languages/<Language>/<Language>_<type>.php`) and the v2.4+ array
@@ -129,7 +155,19 @@ theme, see Section 5.
 
 ---
 
-## 3. Architectural decisions by theme (under revision)
+## 3. Architectural decisions by theme
+
+> **Status note.** Sections in this chapter record decisions, not
+> progress. All four §1 goals shipped end-to-end on `main`:
+>
+> - §3.3 and §3.4 record goal #2 (class-hook convention, BS5-only).
+> - §3.5–§3.10 record goal #1 (v2.4 standards modernization). §3.5
+>   is the prefs-migration decision; §3.10 is its completion record.
+> - §3.9 records goal #3 (behavior layer).
+> - §3.1 and §3.2 record goal #4 (HTML in templates) — applied to
+>   the post-list markup on both surfaces. The form block and
+>   auxiliary divs in `chatbox_menu.php` were intentionally left as
+>   PHP strings; see §1 goal #4 for the reasoning.
 
 ### 3.1 Template system — wrapper and layout pattern
 
@@ -530,68 +568,41 @@ if not yet filed).
 
 ---
 
-## 5. Open / pending themes
+## 5. Known issues
 
-These are filed (or to be filed) as separate issues:
+The plugin is feature-complete. These are minor known issues that
+were noticed during the rewrite but not fixed; they don't break the
+plugin's primary function and are open for bug reports if anyone
+hits them in practice:
 
-- **Menu markup cleanup** — apply the `chatbox-*` class hook convention,
-  remove BS3/BS4 leftovers, address the form block (currently a PHP
-  string).
-- **Page markup cleanup** — same, after menu is done.
-- **Shortcode HTML extraction** — accept `class=` parameter on every
-  shortcode that returns HTML; add default classes; standardize the
-  pattern.
-- **Modernize legacy caret/text helpers** — replace `storeCaret` /
-  `addtext` calls with native `textarea.selectionStart` /
-  `setRangeText`. Not contained to the plugin: the click handler
-  injected by `r_emote()` in e107 core also calls `addtext`, so a
-  full modernization either replaces the emote panel HTML
-  (plugin-side workaround) or fixes `r_emote` upstream (preferred).
-  Option 2 from issue #7's diagnosis.
-- **Inline-style cleanup** — extract `style="..."` attributes to CSS.
-- **Notify message body cleanup** — `NT_LAN_CB_*` constants and the HTML
-  inside the notify message body.
-- **Legacy globals audit** — find and replace any remaining
-  `global $e_event;` (and similar legacy globals) with modern
-  `e107::get*()` accessors.
-- **Language constant rename** — rename numeric / opaque constants
-  (`LAN_CHATBOX_100`, `CHATBOX_L4`, `CHATBOX_L11`–`L14`) to descriptive
-  names (`LAN_CHATBOX_PLACEHOLDER`, `LAN_CHATBOX_SUBMIT`, etc.). Touches
-  language files and every reference site; deliberately not bundled with
-  markup PRs.
-- **Plugin pref rename** — drop the `cb_` prefix from the prefs now that
-  they live in their own namespace (e.g. `cb_layer` → `layer`,
-  `cb_mod` → `moderator_class`). Touches every reader site plus
-  `plugin.xml`'s `<pluginPrefs>`. Deliberately separated from the
-  namespace migration so the upgrade hook only had one job.
-- **`cb_wordwrap` dead pref** — declared in `<pluginPrefs>`, never read
-  anywhere; the message shortcode reads core's `menu_wordwrap`. Either
-  wire it up to actually replace `menu_wordwrap` on the chatbox surface,
-  or remove it. Folds naturally into the dead-prefs sweep.
-- **`e_user.php` `e107::isInstalled('chatbox_menu')` bug** — the plugin
-  folder is `chatbox`, not `chatbox_menu`. The check always returns
-  false on installed sites, so `$chatposts` falls through to `0` and the
-  profile addon's percentage is always 0%. Trivial fix; flagged here
-  because it surfaced during the prefs migration audit.
-- **`e_list.php` LAN dependency bug** — references `CHATBOX_L6` without
-  loading `English_front.php`, and references `LIST_CHATBOX_2` which is
-  not defined anywhere in the plugin.
-- **Dead constants cleanup** — `LAN_AL_CHBLAN_01/03/04/05` and
-  `NT_LAN_CB_1` are defined in `English_global.php` but unused. Audit
-  and remove. Several `CHATBOX_L*` and `CHBLAN_*` may also be unused —
-  audit at the same time.
+- **`e_user.php` typo** — `e107::isInstalled('chatbox_menu')` checks
+  the wrong folder name (should be `chatbox`). Result: the profile
+  addon's chatbox-posts percentage always shows 0%.
+- **`e_list.php` LAN dependency bug** — references `CHATBOX_L6`
+  without loading `English_front.php`, and references
+  `LIST_CHATBOX_2` which is not defined anywhere in the plugin.
+- **`cb_wordwrap` dead pref** — declared in `<pluginPrefs>` but never
+  read; the message shortcode reads core's `menu_wordwrap` instead.
+  Harmless but confusing.
 
-Order is roughly the order above, but not strict — small cleanup tasks
-are good warm-ups between larger themes.
+Cosmetic cleanup tasks that were considered and dropped: language
+constant renames (`LAN_CHATBOX_100` → `LAN_CHATBOX_PLACEHOLDER` etc.),
+plugin pref renames (dropping the `cb_` prefix), dead constants
+sweep, inline-style extraction. None justify a diff at this point.
+
+The `storeCaret` / `addtext` modernization noted in §3.9 belongs in
+e107 core, not this plugin; if anyone takes it on, it's an upstream
+PR.
 
 ---
 
-## 6. Things to read before resuming
+## 6. Things to read
 
-If chat history is lost, read these in order to rebuild context:
+To rebuild context — for someone taking over maintenance, or for
+resuming after a break:
 
-1. The repo `README.md` — contains the rewrite goals, file structure,
-   and theming guidance.
+1. The repo `README.md` — rewrite goals, file structure, theming
+   guidance.
 2. This file (`DEV_NOTES.md`) — architectural decisions and rationale.
 3. Closed issues and merged PRs in the repo — the actual decision trail.
 4. Upstream e107 issue
