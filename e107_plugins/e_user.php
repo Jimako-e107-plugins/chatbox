@@ -26,7 +26,7 @@ class chatbox_user // plugin-folder + '_user'
 		if(!$chatposts = e107::getRegistry('total_chatposts'))
 		{
 			$chatposts = 0; // In case plugin not installed
-			if(e107::isInstalled("chatbox_menu"))
+			if(e107::isInstalled("chatbox"))
 			{
 				$chatposts = e107::getDb()->count("chatbox");
 			}
