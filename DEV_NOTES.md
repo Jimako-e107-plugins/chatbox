@@ -171,6 +171,8 @@ theme, see Section 5.
 
 ### 3.1 Template system — wrapper and layout pattern
 
+**Note:**  This was postponed because main problem was solved by correct plugin classes.  Left here just for future plans. 
+
 **Decision:** Follow the e107 comment plugin pattern —
 `$CHATBOX_TEMPLATE['layout']` defines the surface composition
 (`{CHATBOXFORM}{CHATBOX_LIST}` etc.), and individual subsections

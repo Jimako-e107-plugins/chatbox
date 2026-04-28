@@ -29,6 +29,18 @@ The original plugin remains the right choice for existing sites that don't want 
 
 ---
  
+##  Preserve all functionality
+This is a refactor, not a feature change. The fork must keep working:
+
+AJAX message posting (cb_layer === 2)
+Flood protection
+Moderator controls (delete, block, unblock)
+Emote picker
+Anonymous posting (when enabled in prefs)
+Fixed-height layer mode (cb_layer === 1)
+Cache integration
+Event triggers (cboxpost, user_chatbox_post_created)
+
 
 ## Themes targeting this plugin
 
