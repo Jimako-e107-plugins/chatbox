@@ -21,7 +21,7 @@ Repo: https://github.com/Jimako-e107-plugins/chatbox
 Fork point: the original e107 core plugin `chatbox_menu` (renamed to
 `chatbox`).
 
-Last updated: 2026-04-27 (after JS extraction PR — menu surface; goal #3 closed).
+Last updated: 2026-04-28 (after plugin prefs migration PR — issue #11; §3.10 added; closed in §5).
 
 ---
 
@@ -390,6 +390,88 @@ for moderator actions; emote/caret/AJAX behavior only exists on the
 menu surface. Goal #3 is therefore complete after the menu PR — no
 follow-up surface PR is needed.
 
+### 3.10 Plugin prefs migration — core → plugin namespace
+
+**Issue:** [#11](https://github.com/Jimako-e107-plugins/chatbox/issues/11)
+
+**Decision:** The six plugin-owned prefs (`chatbox_posts`, `cb_mod`,
+`cb_layer`, `cb_layer_height`, `cb_emote`, `cb_user_addon`) move from
+the e107 core config namespace to `e107::getPlugConfig('chatbox')`.
+Three core prefs the plugin only reads (`anon_post`, `user_reg`,
+`smiley_activate`, plus `menu_wordwrap` consumed by the message
+shortcode) stay where they are.
+
+**Why a `_setup.php` and not a one-off ad-hoc script:** e107 has a
+documented upgrade-hook contract — core scans for `<plugin>_setup.php`
+during the admin database-update flow and calls `upgrade_required()`
+to decide whether to surface a notice and `upgrade_post()` to do the
+work. Following the convention means the migration runs through the
+same UI path admins already know, instead of a custom screen we'd have
+to design and document.
+
+**Why `migrateData()` and not hand-rolled read/write/delete:** the
+helper on `e_core_pref` does all four steps of the original plan
+(read legacy keys, write to plugin namespace, remove from core, save)
+in one call, with the documented `if($newPrefs = ...->migrateData(...))`
+idiom guarding against a no-op when none of the legacy keys exist.
+Re-running the hook is therefore a no-op — important because
+`upgrade_required()` could trigger again if an admin's session gets
+weird, and we don't want the second run to clobber their saved
+choices.
+
+**Reproduce the docs idiom verbatim — no merging, no second core save.**
+The first attempt at `upgrade_post()` did three things beyond the
+documented idiom: merged `migrateData()`'s return against the
+plugin-namespace prefs already loaded by core, cached the
+`getPlugConfig` handle in a local, and called `e107::getConfig('core')->save(...)`
+a second time after `migrateData()` had already saved core. Each was
+intended as a defensive improvement; together they produced a silent
+failure on real installs (#11): core was correctly cleaned of the
+legacy keys, but the plugin pref row stayed at the seed defaults.
+The merge was the killer — `array_merge($newPrefs, $existing)` lets
+`$existing` win on key collision, and `$existing` was the seed values
+just written by `<pluginPrefs>` from `plugin.xml`. The admin's actual
+saved values from core got overwritten by defaults, after which
+`setPref()`'s dirty-tracking saw no change and skipped the database
+write. The shipped version follows the dev guide exactly: one chained
+`getPlugConfig('chatbox')->setPref($newPrefs)->save(...)`, no merge,
+no second save. The general rule worth carrying forward: when
+documentation gives a specific idiom, reproduce it before adding
+cleverness on top — defensive code that hasn't been tested against the
+actual failure modes is just noise that hides real bugs.
+
+**`<mainPrefs>` → `<pluginPrefs>` in `plugin.xml`:** the legacy
+`<mainPrefs>` element seeds new installs into the **core** namespace,
+which is precisely the bug we're fixing for old installs. After the
+migration, fresh installs need to land directly in the plugin
+namespace, so the element name must change too. Same set of seed
+defaults; different destination.
+
+**`cb_wordwrap` left in place:** declared in `<pluginPrefs>`, never
+read anywhere in the plugin (the message shortcode reads core's
+`menu_wordwrap`). Removing it would mix concerns; tracked under the
+existing dead-prefs cleanup entry in §5.
+
+**Rename deferred:** dropping the `cb_` prefix once the prefs are in
+their own namespace remains explicitly out of scope, as originally
+planned. Migration first, rename later.
+
+**Read form: `e107::pref('chatbox')` everywhere it fits.** Reading the
+whole array uses the static shortcut, with a local `$plugPref`
+variable on entry-point files that need several keys
+(`admin_chatbox.php`, `chatbox_menu.php`, `chat.php`) and a per-method
+local in shortcodes (`chatbox_shortcodes.php`) and addons
+(`e_user.php`). The longer `e107::getPlugConfig('chatbox')->...` form
+is reserved for two cases where the static shortcut doesn't fit: the
+write site in `admin_chatbox.php` (which needs to chain
+`setPref(...)->save(...)`), and `e_header.php`'s single-key inline
+read (which needs `->get('cb_layer')`).
+
+**Bumped `plugin.xml` to version 1.1:** matches the e107 convention
+that any change requiring an upgrade hook also bumps the version
+number, so core's plugin-version comparison knows an upgrade
+notification belongs on this row.
+
 ---
 
 ## 4. Working conventions
@@ -452,9 +534,6 @@ if not yet filed).
 
 These are filed (or to be filed) as separate issues:
 
-- **Plugin prefs migration** — move `chatbox_posts`, `cb_mod`,
-  `cb_layer`, `cb_layer_height`, `cb_emote` from core config to
-  `e107::getPlugConfig('chatbox')`. Includes one-time upgrade hook.
 - **Menu markup cleanup** — apply the `chatbox-*` class hook convention,
   remove BS3/BS4 leftovers, address the form block (currently a PHP
   string).
@@ -480,6 +559,20 @@ These are filed (or to be filed) as separate issues:
   names (`LAN_CHATBOX_PLACEHOLDER`, `LAN_CHATBOX_SUBMIT`, etc.). Touches
   language files and every reference site; deliberately not bundled with
   markup PRs.
+- **Plugin pref rename** — drop the `cb_` prefix from the prefs now that
+  they live in their own namespace (e.g. `cb_layer` → `layer`,
+  `cb_mod` → `moderator_class`). Touches every reader site plus
+  `plugin.xml`'s `<pluginPrefs>`. Deliberately separated from the
+  namespace migration so the upgrade hook only had one job.
+- **`cb_wordwrap` dead pref** — declared in `<pluginPrefs>`, never read
+  anywhere; the message shortcode reads core's `menu_wordwrap`. Either
+  wire it up to actually replace `menu_wordwrap` on the chatbox surface,
+  or remove it. Folds naturally into the dead-prefs sweep.
+- **`e_user.php` `e107::isInstalled('chatbox_menu')` bug** — the plugin
+  folder is `chatbox`, not `chatbox_menu`. The check always returns
+  false on installed sites, so `$chatposts` falls through to `0` and the
+  profile addon's percentage is always 0%. Trivial fix; flagged here
+  because it surfaced during the prefs migration audit.
 - **`e_list.php` LAN dependency bug** — references `CHATBOX_L6` without
   loading `English_front.php`, and references `LIST_CHATBOX_2` which is
   not defined anywhere in the plugin.

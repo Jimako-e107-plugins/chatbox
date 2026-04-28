@@ -25,6 +25,7 @@ require_once(e_ADMIN."auth.php");
 require_once(e_HANDLER."userclass_class.php");
 $mes = e107::getMessage();
 $frm    = e107::getForm();
+$plugPref = e107::pref('chatbox');
 
 if (isset($_POST['updatesettings']))
 {
@@ -37,7 +38,7 @@ if (isset($_POST['updatesettings']))
 	$temp['cb_user_addon'] = intval($_POST['cb_user_addon']);
 
 
-	e107::getConfig('core')->setPref($temp)->save(false);
+	e107::getPlugConfig('chatbox')->setPref($temp)->save(false, true, false);
 	e107::getCache()->clear("nq_chatbox");
 
 }
@@ -81,9 +82,9 @@ if (isset($_POST['recalculate']))
 }
 
 
-if(!isset($pref['cb_mod']))
+if(!isset($plugPref['cb_mod']))
 {
-	$pref['cb_mod'] = e_UC_ADMIN;
+	$plugPref['cb_mod'] = e_UC_ADMIN;
 }
 
 $text = "
@@ -95,15 +96,15 @@ $text = "
     	</colgroup>
 	<tr>
 		<td>".CHBLAN_11.":</td>
-		<td>".$frm->select('chatbox_posts', array(5, 10, 15, 20, 25), varset($pref['chatbox_posts']),'useValues=1')."<span class='field-help'>".CHBLAN_12."</span></td>
+		<td>".$frm->select('chatbox_posts', array(5, 10, 15, 20, 25), varset($plugPref['chatbox_posts']),'useValues=1')."<span class='field-help'>".CHBLAN_12."</span></td>
 	</tr>
 	<tr>
 		<td>".CHBLAN_32.": </td>
-		<td>". r_userclass("cb_mod", varset($pref['cb_mod']), 'off', "nobody,main,admin, classes")."</td>
+		<td>". r_userclass("cb_mod", varset($plugPref['cb_mod']), 'off', "nobody,main,admin, classes")."</td>
 	</tr>
 	<tr>
 		<td>".CHBLAN_36."</td>
-		<td>".$frm->radio('cb_layer', array(0 => CHBLAN_37, 1 => str_replace("[x]", $frm->number('cb_layer_height', varset($pref['cb_layer_height']), 3), CHBLAN_29), 2 => CHBLAN_38), varset($pref['cb_layer']), array('sep' => '<br />'))."</td>
+		<td>".$frm->radio('cb_layer', array(0 => CHBLAN_37, 1 => str_replace("[x]", $frm->number('cb_layer_height', varset($plugPref['cb_layer_height']), 3), CHBLAN_29), 2 => CHBLAN_38), varset($plugPref['cb_layer']), array('sep' => '<br />'))."</td>
 	</tr>
 	";
 
@@ -111,14 +112,14 @@ if(!empty($pref['smiley_activate']))
 {
 	$text .= "<tr>
 				  	<td>".CHBLAN_31."?: </td>
-					<td>".$frm->radio_switch('cb_emote', varset($pref['cb_emote']))."</td>
+					<td>".$frm->radio_switch('cb_emote', varset($plugPref['cb_emote']))."</td>
 				  </tr>";
 }
 
 $text .= "
 	<tr>
 		<td>".CHBLAN_42."</td>
-		<td>".$frm->radio_switch('cb_user_addon', varset($pref['cb_user_addon']))."</td>
+		<td>".$frm->radio_switch('cb_user_addon', varset($plugPref['cb_user_addon']))."</td>
 	</tr>
 	<tr>
 		<td>".LAN_PRUNE.":</td>

@@ -23,6 +23,7 @@ global $e107cache, $e107;
 
 $tp = e107::getParser();
 $pref = e107::getPref();
+$plugPref = e107::pref('chatbox');
 
 if(!e107::isInstalled('chatbox'))
 {
@@ -166,7 +167,7 @@ else
 {
 	$cb_width = (defined('CBWIDTH') ? CBWIDTH : '');
 
-	if(varset($pref['cb_layer']) === 2)
+	if(varset($plugPref['cb_layer']) === 2)
 	{
 
 		$texta = "<form id='chatbox' action='" . e_REQUEST_SELF . "' method='post'>
@@ -189,7 +190,7 @@ else
 				? "style='width: " . $cb_width . ";'" : '') . ' /><br />';
 	}
 
-	if($pref['cb_layer'] === 2)
+	if($plugPref['cb_layer'] === 2)
 	{
 
 		$oc = "data-chatbox-ajax='1'"
@@ -214,7 +215,7 @@ else
 	// $texta .= "<input type='reset' name='reset' value='".CHATBOX_L5."' />"; // How often do we see these lately? ;-)
 
 
-	if(!empty($pref['cb_emote']) && !empty($pref['smiley_activate']))
+	if(!empty($plugPref['cb_emote']) && !empty($pref['smiley_activate']))
 	{
 		$texta .= "
 		<input class='button btn btn-sm btn-secondary chatbox-emotes-toggle' type='button' style='cursor:pointer' size='30' value='" . CHATBOX_L14 . "' data-chatbox-emote-toggle='emote' />
@@ -236,18 +237,18 @@ if(!$text = e107::getCache()->retrieve('nq_chatbox'))
 
 	global $pref, $tp;
 
-	$pref['chatbox_posts'] = (!empty($pref['chatbox_posts']) ? (int) $pref['chatbox_posts'] : 10);
+	$plugPref['chatbox_posts'] = (!empty($plugPref['chatbox_posts']) ? (int) $plugPref['chatbox_posts'] : 10);
 
-	$chatbox_posts = $pref['chatbox_posts'];
+	$chatbox_posts = $plugPref['chatbox_posts'];
 
-	if(!isset($pref['cb_mod']))
+	if(!isset($plugPref['cb_mod']))
 	{
-		$pref['cb_mod'] = e_UC_ADMIN;
+		$plugPref['cb_mod'] = e_UC_ADMIN;
 	}
 
 	if(!defined('CB_MOD'))
 	{
-		define('CB_MOD', check_class($pref['cb_mod']));
+		define('CB_MOD', check_class($plugPref['cb_mod']));
 	}
 
 	$qry = "SELECT c.*, u.user_name, u.user_image FROM #chatbox AS c
@@ -307,16 +308,16 @@ $caption = (file_exists(THEME . 'images/chatbox_menu.png')
 	: LAN_PLUGIN_CHATBOX_MENU_NAME);
 
 
-if(varset($pref['cb_layer']) === 1)
+if(varset($plugPref['cb_layer']) === 1)
 {
 
 	$text =
-		$texta . "<div class='chatbox-scroll-layer' style='border : 0; padding : 4px; width : auto; height : " . $pref['cb_layer_height'] . "px; overflow : auto; '>" . $text . '</div>';
+		$texta . "<div class='chatbox-scroll-layer' style='border : 0; padding : 4px; width : auto; height : " . $plugPref['cb_layer_height'] . "px; overflow : auto; '>" . $text . '</div>';
 
 	$ns->tablerender($caption, $text, 'chatbox');
 
 }
-elseif(varset($pref['cb_layer']) === 2 && e_AJAX_REQUEST)
+elseif(varset($plugPref['cb_layer']) === 2 && e_AJAX_REQUEST)
 {
 
 	$text = $texta . $text;
@@ -329,7 +330,7 @@ else
 
 	$text = $texta . $text;
 
-	if($pref['cb_layer'] === 2)
+	if($plugPref['cb_layer'] === 2)
 	{
 		$text = "<div id='chatbox_posts'>" . $text . '</div>';
 	}

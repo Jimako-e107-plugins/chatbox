@@ -22,6 +22,7 @@ $mes = e107::getMessage();
 $tp = e107::getParser();
 $sql = e107::getDb();
 $ns = e107::getRender();
+$plugPref = e107::pref('chatbox');
 
 if($sql->select('menus', "*", "menu_name='chatbox_menu'"))
 {
@@ -36,12 +37,12 @@ if($sql->select('menus', "*", "menu_name='chatbox_menu'"))
 	}
 }
 
-if ( ! isset($pref['cb_mod'])) {
-	$pref['cb_mod'] = e_UC_ADMIN;
+if ( ! isset($plugPref['cb_mod'])) {
+	$plugPref['cb_mod'] = e_UC_ADMIN;
 }
 if(!defined('CB_MOD'))
 {
-	define('CB_MOD', check_class($pref['cb_mod']));
+	define('CB_MOD', check_class($plugPref['cb_mod']));
 }
 
 if ( ! empty($_POST['moderate']) && CB_MOD) {

@@ -16,7 +16,7 @@ class chatbox_user // plugin-folder + '_user'
 
 	function profile($udata)
 	{
-		$pref = e107::getPref();
+		$pref = e107::pref('chatbox');
 
 		if (!$pref['cb_user_addon'])
 		{

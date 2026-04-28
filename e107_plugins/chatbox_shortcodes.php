@@ -168,7 +168,8 @@ class chatbox_shortcodes extends e_shortcode
 		}
 
 		$pref = e107::getPref();
-		$emotes_active = !empty($pref['cb_emote']) ? 'USER_BODY, emotes_on'
+		$plugPref = e107::pref('chatbox');
+		$emotes_active = !empty($plugPref['cb_emote']) ? 'USER_BODY, emotes_on'
 			: 'USER_BODY, emotes_off';
 
 		$cb_message = e107::getParser()
